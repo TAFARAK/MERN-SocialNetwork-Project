@@ -4,9 +4,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import "../models/user.js";
-// import '../../server/models/user.js'
 import bcryptjs from "bcryptjs";
-import Signin from "../../client/src/components/screens/Signin.js";
+import jwt from 'jsonwebtoken';
+import { SecretValues } from '../keys.js';
 
 const router = express.Router();
 const User = mongoose.model("User");
@@ -62,7 +62,11 @@ router.post("/signin", (req, res) => {
     bcryptjs.compare(password,savedUser.password)
     .then(doMatch=>{
       if(doMatch){
-        res.json({message:"From Server: Successully Signed In"})
+        // res.json({message:"From Server: Successully Signed In"})
+        const token = jwt.sign({_id:savedUser._id},'SecretValues');
+        const {_id,name,email} = savedUser;
+        res.json({token,user:{_id,name,email}});
+        console.log(token);
       }
       else{
         return res.status(422).json({ error: "Invalid Email or Password" });
